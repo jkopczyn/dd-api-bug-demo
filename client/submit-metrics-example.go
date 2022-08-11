@@ -5,7 +5,8 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/DataDog/datadog-api-client-go/api/v2/datadog"
+	"github.com/DataDog/datadog-api-client-go/v2/api/datadog"
+	"github.com/DataDog/datadog-api-client-go/v2/api/datadogV2"
 	"github.com/sirupsen/logrus"
 )
 
@@ -72,10 +73,10 @@ func datadogSetup(ctx context.Context, proxyHost string, secure bool) (context.C
 	return ctx, datadogClient
 }
 
-func PushMetrics(body datadog.MetricPayload) error {
+func PushMetrics(body datadogV2.MetricPayload) error {
 	ctx, datadogClient := datadogSetup(context.Background(), "", false)
 
-	payload, resp, err := datadogClient.MetricsApi.SubmitMetrics(ctx, body, *datadog.NewSubmitMetricsOptionalParameters())
+	payload, resp, err := datadogV2.NewMetricsApi(datadogClient).SubmitMetrics(ctx, body, *datadogV2.NewSubmitMetricsOptionalParameters())
 	if err != nil {
 		logrus.Errorf("Error when calling `MetricsApi.SubmitMetrics`: %v\n", err)
 		logrus.Debugf("Full HTTP response: %v\n", resp)
@@ -87,13 +88,13 @@ func PushMetrics(body datadog.MetricPayload) error {
 	return err
 }
 
-func makeEmptyMetricBody() datadog.MetricPayload {
-	return datadog.MetricPayload{
-		Series: []datadog.MetricSeries{
+func makeEmptyMetricBody() datadogV2.MetricPayload {
+	return datadogV2.MetricPayload{
+		Series: []datadogV2.MetricSeries{
 			{
 				Metric: "system-alive",
-				Type:   datadog.METRICINTAKETYPE_GAUGE.Ptr(),
-				Points: []datadog.MetricPoint{
+				Type:   datadogV2.METRICINTAKETYPE_GAUGE.Ptr(),
+				Points: []datadogV2.MetricPoint{
 					{
 						Timestamp: datadog.PtrInt64(time.Now().Unix()),
 						Value:     datadog.PtrFloat64(float64(1)),
