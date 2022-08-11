@@ -15,7 +15,6 @@ var log = logrus.New()
 func configurationForProxy(secure bool) *datadog.Configuration {
 	proxyHost := "localhost"
 	protocol := "http"
-	log.Debugf("Datadog client config: secure=%t, host=%s", secure, proxyHost)
 
 	conf := datadog.NewConfiguration()
 	conf.Servers = []datadog.ServerConfiguration{
@@ -107,7 +106,7 @@ func makeEmptyMetricBody() datadogV2.MetricPayload {
 	}
 }
 
-func main() {
+func client() {
 	log.Level = logrus.DebugLevel
 
 	err := PushMetrics(makeEmptyMetricBody())
