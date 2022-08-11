@@ -1,16 +1,17 @@
 package main
 
 import (
-	"log"
+	"github.com/sirupsen/logrus"
 	"net/http"
 )
 
 func serveHTTP(wr http.ResponseWriter, req *http.Request) {
-	http.Error(wr, "Client Error: Headers", http.StatusBadRequest)
+	http.Error(wr, "Client Error: Headers", http.StatusOK)
 }
 
 func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", serveHTTP)
-	log.Fatal("ListenAndServe:", http.ListenAndServe(":80", mux))
+	logrus.Info("Server online...")
+	logrus.Fatal("ListenAndServe:", http.ListenAndServe(":80", mux))
 }
