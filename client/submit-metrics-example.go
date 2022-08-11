@@ -65,19 +65,15 @@ func configurationForProxy(secure bool) *datadog.Configuration {
 func datadogSetup(ctx context.Context, proxyHost string, secure bool) (context.Context, *datadog.APIClient) {
 	ctx = datadog.NewDefaultContext(ctx)
 	logrus.WithContext(ctx).Debug("Setting up datadog client")
-	configuration := configurationForProxy(proxyHost, secure)
+	configuration := configurationForProxy(secure)
 	logrus.WithContext(ctx).Debug("Set datadog client config successfully")
 	datadogClient := datadog.NewAPIClient(configuration)
 	logrus.WithContext(ctx).Debug("Set up datadog client successfully")
 	return ctx, datadogClient
 }
 
-func PushMetrics(ctx context.Context, body datadog.MetricPayload) error {
-	ctx, datadogClient := datadogSetup(ctx, "", false)
-	if err != nil {
-		logrus.Errorf("Error when setting up Datadog client for metrics: %v\n", err)
-		return err
-	}
+func PushMetrics(body datadog.MetricPayload) error {
+	ctx, datadogClient := datadogSetup(context.Background(), "", false)
 
 	payload, resp, err := datadogClient.MetricsApi.SubmitMetrics(ctx, body, *datadog.NewSubmitMetricsOptionalParameters())
 	if err != nil {
@@ -85,7 +81,7 @@ func PushMetrics(ctx context.Context, body datadog.MetricPayload) error {
 		logrus.Debugf("Full HTTP response: %v\n", resp)
 		payloadContent, _ := json.MarshalIndent(payload, "", "  ")
 		logrus.Debugf("Payload from `MetricsApi.SubmitMetrics`:\n%s\n", payloadContent)
-		clientConfig := cachedDatadogClient.GetConfig()
+		clientConfig := datadogClient.GetConfig()
 		logrus.Debugf("Datadog Client Configuration:\n%v\n", clientConfig)
 	}
 	return err
@@ -109,6 +105,6 @@ func makeEmptyMetricBody() datadog.MetricPayload {
 }
 
 func main() {
-	err := PushMetrics(ctx, makeEmptyMetricBody(), nil)
+	err := PushMetrics(makeEmptyMetricBody())
 	logrus.Error(err)
 }
